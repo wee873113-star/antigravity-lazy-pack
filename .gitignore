@@ -54,3 +54,8 @@ images/generated/
 wordcloud-app/
 scratch/
 tmp/
+
+# Water movement project temporary renders and downloaded assets
+water-movement/assets/
+water-movement/renders/
+water-movement/water_movement.mp4

@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>水的移動魔法 — 社群科普</title>
+<style>
+  @font-face { font-family: 'GenSeki TW'; src: url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype'); font-weight: 500; font-display: block; }
+  @font-face { font-family: 'GenSeki TW'; src: url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype'); font-weight: 700; font-display: block; }
+  @font-face { font-family: 'GenSeki TW'; src: url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype'); font-weight: 900; font-display: block; }
+
+  :root {
+    --paper: #FAF7EE; --paper-2: #F2EDDC; --ink: #1A1A1A;
+    --teal: #0E7C7B; --coral: #E36414; --gold: #C8941F;
+    --neon: #FFD23F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%; background: #000; overflow: hidden;
+    font-family: 'GenSeki TW', sans-serif; font-weight: 500; color: var(--ink);
+  }
+  .stage { position: fixed; inset: 0; background: var(--paper); }
+  .slide {
+    position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease; overflow: hidden;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .chapter {
+    position: absolute; top: 30px; left: 48px; z-index: 5;
+    font-family: 'GenSeki TW'; font-weight: 700; font-size: 22px;
+    letter-spacing: 0.16em;
+  }
+  .chapter .num {
+    background: var(--teal); color: #fff; padding: 4px 14px;
+    border-radius: 4px; font-weight: 900; margin-right: 10px;
+  }
+  .chapter.on-dark { color: rgba(255,255,255,0.85); }
+
+  /* 字幕（社群放大版 36px）*/
+  .subtitle {
+    position: absolute; left: 50%; bottom: 50px; transform: translateX(-50%);
+    max-width: 90%; padding: 18px 40px; border-radius: 12px;
+    background: rgba(26,26,26,0.92); color: #fff;
+    font-weight: 700; font-size: 36px; line-height: 1.4;
+    text-align: center; opacity: 0; transition: opacity 0.4s ease;
+    z-index: 10;
+  }
+  .subtitle.show { opacity: 1; }
+
+  /* 進度條 8px */
+  .progress {
+    position: absolute; left: 0; bottom: 0; height: 8px;
+    background: linear-gradient(90deg, var(--teal), var(--neon));
+    width: 0%; transition: width 0.2s linear; z-index: 11;
+  }
+
+  /* 開場 */
+  .start-screen {
+    position: fixed; inset: 0; background: var(--ink); color: var(--paper);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 999; cursor: pointer; gap: 40px;
+  }
+  .start-screen .t { font-weight: 900; font-size: 150px; letter-spacing: 0.08em; line-height: 1.2; text-align: center; }
+  .start-screen .s { font-size: 26px; color: rgba(250,247,238,0.6); font-weight: 700; }
+  .start-screen .play {
+    width: 96px; height: 96px; border: 3px solid var(--neon);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: var(--neon); transition: all 0.3s;
+  }
+  .start-screen:hover .play { background: var(--neon); color: var(--ink); }
+  .start-screen.hidden { display: none; }
+
+  /* ===== L5 純大字 ===== */
+  .L5 { background: var(--ink); color: var(--paper);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px; }
+  .L5 .big {
+    font-weight: 900; font-size: 180px; line-height: 1.25;
+    letter-spacing: 0.04em;
+  }
+  .L5 .accent { color: var(--neon); }
+  .L5 .small { font-size: 40px; color: rgba(250,247,238,0.7); margin-top: 40px; font-weight: 700; }
+
+  /* ===== L2 左右並列 ===== */
+  .L2 { display: grid; grid-template-columns: 1fr 1fr; }
+  .L2 .col-img {
+    background-size: cover; background-position: center;
+    position: relative;
+  }
+  .L2 .col-img::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 60%, var(--paper) 100%);
+  }
+  .L2 .col-text {
+    background: var(--paper); padding: 100px 80px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .L2 .label {
+    font-size: 24px; font-weight: 700; letter-spacing: 0.3em;
+    color: var(--coral); margin-bottom: 24px;
+  }
+  .L2 .head {
+    font-size: 100px; font-weight: 900; line-height: 1.15; color: var(--ink);
+    margin-bottom: 30px;
+  }
+  .L2 .head .hl { color: var(--teal); }
+  .L2 .body { font-size: 36px; font-weight: 700; color: #333; line-height: 1.5; }
+
+  /* ===== L1 全版照片 ===== */
+  .L1 { background-size: cover; background-position: center;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        position: relative; padding: 80px; color: #fff; text-align: center; }
+  .L1::before {
+    content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.65);
+  }
+  .L1 > * { position: relative; z-index: 1; }
+  .L1 .tag {
+    font-size: 28px; letter-spacing: 0.3em; color: var(--neon);
+    font-weight: 700; margin-bottom: 30px;
+  }
+  .L1 .head {
+    font-size: 160px; font-weight: 900; line-height: 1.1; letter-spacing: 0.04em;
+  }
+
+  /* ===== L3 圖示陣列 ===== */
+  .L3 { background: var(--paper); padding: 100px 80px 140px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .L3 h2 {
+    font-size: 96px; font-weight: 900; color: var(--ink);
+    text-align: center; margin-bottom: 60px; line-height: 1.1;
+  }
+  .L3 h2 .hl { color: var(--coral); }
+  .L3 .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; width: 100%;
+  }
+  .L3 .item {
+    background: #fff; border: 4px solid var(--ink); border-radius: 16px;
+    padding: 40px 28px; text-align: center;
+    opacity: 0; transform: translateY(30px); transition: all 0.6s ease;
+  }
+  .L3.active .item { opacity: 1; transform: translateY(0); }
+  .L3.active .item:nth-child(1) { transition-delay: 0.5s; }
+  .L3.active .item:nth-child(2) { transition-delay: 1.2s; }
+  .L3.active .item:nth-child(3) { transition-delay: 1.9s; }
+  .L3 .item .ic { font-size: 88px; line-height: 1; }
+  .L3 .item .lb {
+    font-size: 40px; font-weight: 900; color: var(--teal); margin-top: 20px;
+  }
+  .L3 .item .desc { font-size: 26px; color: #333; margin-top: 10px; font-weight: 700; }
+
+  /* ===== L4 SVG 置中 ===== */
+  .L4 { background: var(--paper); padding: 80px 80px 140px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .L4 h2 {
+    font-size: 80px; font-weight: 900; color: var(--ink);
+    text-align: center; margin-bottom: 30px; line-height: 1.1;
+  }
+  .L4 h2 .hl { color: var(--coral); }
+  .L4 svg { display: block; }
+
+  /* ===== Slide 特定 ===== */
+  .s2 .col-img { background-image: url('assets/images/sponge.jpg'); }
+  .s3 { background-image: url('assets/images/celery.jpg'); }
+  .s5 { background-image: url('assets/images/teapot.jpg'); }
+  .s7 { background-image: url('assets/images/fishtank.jpg'); }
+
+  /* SVG 動畫元素 */
+  .anim { opacity: 0; transition: opacity 0.6s ease, transform 0.6s ease; }
+  .anim.in { opacity: 1; }
+
+  /* 粒子動畫 */
+  .tokens { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .tokens span {
+    position: absolute; color: rgba(255,210,63,0.18);
+    font-weight: 900; font-family: 'GenSeki TW';
+    animation: floatUp 6s linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* SVG 動畫：水上升 */
+  .water-column {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .active .water-column.in {
+    transform: scaleY(1);
+  }
+
+  /* 連通管注水 */
+  .communicating-water {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .active .communicating-water.in {
+    transform: scaleY(1);
+  }
+
+  /* 虹吸水流箭頭 */
+  .flow-arrow {
+    stroke-dasharray: 20, 15;
+    stroke-dashoffset: 0;
+  }
+  .active .flow-active {
+    animation: flowDash 3s linear infinite;
+  }
+  @keyframes flowDash {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="start-screen" id="startScreen">
+  <div class="t">水的移動魔法</div>
+  <div class="play"><svg width="28" height="32" viewBox="0 0 24 28"><path d="M2 2 L22 14 L2 26 Z" fill="currentColor"/></svg></div>
+  <div class="s">社群科普 · 點擊開始 · 約 1:48</div>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- ===== Slide 1 — Hook L5 ===== -->
+  <div class="slide L5 s1">
+    <div class="tokens" id="tokens1"></div>
+    <div style="position:relative;z-index:1;">
+      <div class="big">水沒有腳，<br>卻會<span class="accent">自己爬</span>？</div>
+      <div class="small">大自然的水移動魔法 🌟</div>
+    </div>
+  </div>
+
+  <!-- ===== Slide 2 — L2 比喻 ===== -->
+  <div class="slide L2 s2">
+    <div class="chapter"><span class="num">02</span> / 11 — 比喻</div>
+    <div class="col-img"></div>
+    <div class="col-text">
+      <div class="label">MAGICAL WATER</div>
+      <div class="head">水寶寶的<br><span class="hl">超能力</span></div>
+      <div class="body">這不是魔法，而是水的特殊本領。今天一起來拆解吧！</div>
+    </div>
+  </div>
+
+  <!-- ===== Slide 3 — L1 全版照片 (毛細現象標題) ===== -->
+  <div class="slide L1 s3">
+    <div class="chapter on-dark"><span class="num">03</span> / 11 — 超能力 ①</div>
+    <div class="tag">CAPILLARY ACTION</div>
+    <div class="head">毛細現象</div>
+  </div>
+
+  <!-- ===== Slide 4 — L4 SVG (毛細現象原理) ===== -->
+  <div class="slide L4 s4">
+    <div class="chapter"><span class="num">04</span> / 11 — 原理圖解</div>
+    <h2>縫隙越小，<span class="hl">爬得越高</span></h2>
+    <svg width="1500" height="500" viewBox="0 0 1500 500">
+      <!-- 底部水槽 -->
+      <rect x="150" y="380" width="1200" height="60" fill="#0E7C7B" opacity="0.4" rx="10"/>
+      <line x1="150" y1="380" x2="1350" y2="380" stroke="#0E7C7B" stroke-width="4"/>
+
+      <!-- 粗管 (x=350) -->
+      <rect x="300" y="80" width="100" height="300" fill="none" stroke="#1A1A1A" stroke-width="4" opacity="0.8"/>
+      <!-- 水柱1 -->
+      <rect class="water-column anim" data-d="500" x="304" y="330" width="92" height="50" fill="#0E7C7B" />
+      <text x="350" y="460" text-anchor="middle" font-size="28" font-weight="700" fill="#1A1A1A">粗管子</text>
+
+      <!-- 中管 (x=750) -->
+      <rect x="725" y="80" width="50" height="300" fill="none" stroke="#1A1A1A" stroke-width="4" opacity="0.8"/>
+      <!-- 水柱2 -->
+      <rect class="water-column anim" data-d="1200" x="729" y="230" width="42" height="150" fill="#0E7C7B" />
+      <text x="750" y="460" text-anchor="middle" font-size="28" font-weight="700" fill="#1A1A1A">中管子</text>
+
+      <!-- 細管 (x=1150) -->
+      <rect x="1142" y="80" width="16" height="300" fill="none" stroke="#1A1A1A" stroke-width="4" opacity="0.8"/>
+      <!-- 水柱3 -->
+      <rect class="water-column anim" data-d="1900" x="1146" y="110" width="8" height="270" fill="#0E7C7B" />
+      <text x="1150" y="460" text-anchor="middle" font-size="28" font-weight="700" fill="#1A1A1A">細管子 🚀</text>
+
+      <!-- 高度虛線指引 -->
+      <path class="anim" data-d="2600" d="M 1146,110 L 150,110" stroke="#E36414" stroke-width="3" stroke-dasharray="8,8"/>
+      <text class="anim" data-d="2600" x="170" y="95" font-size="26" font-weight="900" fill="#E36414">爬最高！</text>
+    </svg>
+  </div>
+
+  <!-- ===== Slide 5 — L1 全版照片 (連通管標題) ===== -->
+  <div class="slide L1 s5">
+    <div class="chapter on-dark"><span class="num">05</span> / 11 — 超能力 ②</div>
+    <div class="tag">COMMUNICATING VESSELS</div>
+    <div class="head">連通管原理</div>
+  </div>
+
+  <!-- ===== Slide 6 — L4 SVG (連通管原理) ===== -->
+  <div class="slide L4 s6">
+    <div class="chapter"><span class="num">06</span> / 11 — 原理圖解</div>
+    <h2>水平面永遠<span class="hl">保持一致</span></h2>
+    <svg width="1500" height="500" viewBox="0 0 1500 500">
+      <!-- 連通管外框 -->
+      <path d="M 200,100 L 200,380 L 1300,380 L 1300,100 L 1260,100 L 1260,340 L 980,340 
+               C 980,240 900,150 850,150 C 800,150 780,240 780,340 L 460,340 
+               L 420,100 L 380,100 L 420,340 L 240,340 L 240,100 Z" 
+            fill="none" stroke="#1A1A1A" stroke-width="6"/>
+
+      <!-- 連通管注入的水 (透過 scaleY 動畫上升) -->
+      <path class="communicating-water anim" data-d="600" 
+            d="M 204,220 L 204,376 L 1296,376 L 1296,220 L 1264,220 L 1264,336 L 976,336 
+               C 976,236 896,154 850,154 C 804,154 784,236 784,336 L 456,336 
+               L 418,220 L 382,220 L 416,336 L 236,336 L 236,220 Z" 
+            fill="#0E7C7B" opacity="0.8"/>
+
+      <!-- 同高度虛線 -->
+      <line class="anim" data-d="1800" x1="150" y1="220" x2="1350" y2="220" stroke="#E36414" stroke-width="4" stroke-dasharray="10,10"/>
+      <text class="anim" data-d="1800" x="750" y="200" text-anchor="middle" font-size="28" font-weight="900" fill="#E36414">一模一樣高！</text>
+    </svg>
+  </div>
+
+  <!-- ===== Slide 7 — L1 全版照片 (虹吸標題) ===== -->
+  <div class="slide L1 s7">
+    <div class="chapter on-dark"><span class="num">07</span> / 11 — 超能力 ③</div>
+    <div class="tag">SIPHON PHENOMENON</div>
+    <div class="head">虹吸現象</div>
+  </div>
+
+  <!-- ===== Slide 8 — L4 SVG (虹吸原理) ===== -->
+  <div class="slide L4 s8">
+    <div class="chapter"><span class="num">08</span> / 11 — 原理圖解</div>
+    <h2>重力與水分子<span class="hl">拉力</span></h2>
+    <svg width="1500" height="500" viewBox="0 0 1500 500">
+      <!-- 高水杯 (x=200, y=220) -->
+      <rect x="200" y="220" width="220" height="220" fill="none" stroke="#1A1A1A" stroke-width="4" rx="8"/>
+      <rect x="204" y="300" width="212" height="136" fill="#0E7C7B" opacity="0.4" rx="4"/>
+      <text x="310" y="470" text-anchor="middle" font-size="26" font-weight="700">高水杯</text>
+
+      <!-- 低水杯 (x=1080, y=300) -->
+      <rect x="1080" y="300" width="220" height="140" fill="none" stroke="#1A1A1A" stroke-width="4" rx="8"/>
+      <!-- 水緩緩流進去 -->
+      <rect class="anim" data-d="2500" x="1084" y="390" width="212" height="46" fill="#0E7C7B" opacity="0.4" rx="4"/>
+      <text x="1190" y="470" text-anchor="middle" font-size="26" font-weight="700">低水杯</text>
+
+      <!-- 虹吸水管外框 -->
+      <path d="M 310,400 L 310,100 C 310,40 1190,40 1190,100 L 1190,410" 
+            fill="none" stroke="#1A1A1A" stroke-width="24" stroke-linecap="round"/>
+      <path d="M 310,400 L 310,100 C 310,40 1190,40 1190,100 L 1190,410" 
+            fill="none" stroke="#FAF7EE" stroke-width="16" stroke-linecap="round"/>
+
+      <!-- 水管內的水流動 (流向黃色箭頭) -->
+      <path class="flow-active anim" data-d="800" d="M 310,380 L 310,100 C 310,48 1190,48 1190,100 L 1190,400" 
+            fill="none" stroke="#0E7C7B" stroke-width="12" stroke-linecap="round"/>
+      <path class="flow-arrow flow-active anim" data-d="1200" d="M 310,380 L 310,100 C 310,48 1190,48 1190,100 L 1190,400" 
+            fill="none" stroke="#FFD23F" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- 標註說明 -->
+      <text class="anim" data-d="1500" x="750" y="140" text-anchor="middle" font-size="28" font-weight="900" fill="#E36414">水像小火車被拉過去！</text>
+    </svg>
+  </div>
+
+  <!-- ===== Slide 9 — L5 轉折 ===== -->
+  <div class="slide L5 s9">
+    <div class="tokens" id="tokens2"></div>
+    <div style="position:relative;z-index:1;">
+      <div class="big">這些超能力，<br>在 <span class="accent">哪裡</span> 看到？</div>
+    </div>
+  </div>
+
+  <!-- ===== Slide 10 — L3 圖示陣列 (生活應用) ===== -->
+  <div class="slide L3 s10">
+    <div class="chapter"><span class="num">10</span> / 11 — 生活應用</div>
+    <h2>生活中的 <span class="hl">水魔法</span></h2>
+    <div class="grid">
+      <div class="item">
+        <div class="ic">🌱</div>
+        <div class="lb">植物吸水</div>
+        <div class="desc">毛細現象讓水往上喝</div>
+      </div>
+      <div class="item">
+        <div class="ic">🏠</div>
+        <div class="lb">大樓送水</div>
+        <div class="desc">連通管送自來水上樓</div>
+      </div>
+      <div class="item">
+        <div class="ic">🐠</div>
+        <div class="lb">魚缸換水</div>
+        <div class="desc">虹吸管自動把髒水吸走</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Slide 11 — L5 結語 ===== -->
+  <div class="slide L5 s11">
+    <div class="tokens" id="tokens3"></div>
+    <div style="position:relative;z-index:1;">
+      <div class="big">大自然的水，<br><span class="accent">動起來</span> 充滿魔法！</div>
+      <div class="small">下次洗手或喝水時，記得觀察一下喔！</div>
+    </div>
+  </div>
+
+  <div class="subtitle" id="subtitle"></div>
+</div>
+<div class="progress" id="progress"></div>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+const PAGES = [
+  { i:1,  dur:9.65,  sub:"小朋友，你有沒有想過，水沒有腳，為什麼能自己往高處爬，還會像坐雲霄飛車一樣，自動流出來呢？" },
+  { i:2,  dur:8.42,  sub:"這可不是魔法，而是水寶寶的三個神奇超能力！今天就帶你一起來拆解它們吧！" },
+  { i:3,  dur:10.51, sub:"第一個超能力叫「毛細現象」。當水遇到很細很細的縫隙時，水分子會手拉手，自動沿著縫隙往上爬！" },
+  { i:4,  dur:8.88,  sub:"就像我們用抹布擦水，或者植物從泥土裡吸水一樣，細小的管子或縫隙越窄，水寶寶就爬得越高！" },
+  { i:5,  dur:10.73, sub:"第二個超能力叫「連通管原理」。只要底下連在一起，不管管子長得多粗、多細或多奇怪，水面都會一樣高！" },
+  { i:6,  dur:11.16, sub:"就像倒茶的時候，茶壺嘴的水面和茶壺裡的水面永遠是平的。大樓的水塔也是用這個原理，把水送到各個家裡喔！" },
+  { i:7,  dur:10.61, sub:"第三個超能力叫「虹吸現象」。水寶寶可以用一條水管，像火車一樣手牽手，越過高山流到更低的地方！" },
+  { i:8,  dur:9.91,  sub:"只要管子裡先裝滿水，低處管口的重力就會把水往下扯，就像拉隱形的鎖鏈一樣，把高處的水源源不絕地拉過來！" },
+  { i:9,  dur:7.90,  sub:"這三種超能力，可不是只在實驗室裡有喔，在我們的生活周遭，它們天天都在熱心幫忙呢！" },
+  { i:10, dur:9.62,  sub:"像是植物用毛細現象喝水、大樓用連通管原理把水送上樓，還有幫魚缸換水時的虹吸現象，都是多虧了它們呢！" },
+  { i:11, dur:10.46, sub:"水看起來很平凡，但它的移動卻充滿了大自然的魔法！下次洗手或喝水時，記得睜大眼睛觀察一下它們喔！" }
+];
+
+const TOTAL = PAGES.reduce((s,p)=>s+p.dur, 0);
+const slides = document.querySelectorAll('.slide');
+const audio = document.getElementById('audio');
+const sub = document.getElementById('subtitle');
+const startScreen = document.getElementById('startScreen');
+const progress = document.getElementById('progress');
+
+// 飄入水滴粒子生成器
+function makeDroplets(elId) {
+  const container = document.getElementById(elId);
+  if (!container) return;
+  const TOKENS = ['💧','💦','🌊','H₂O','水','💧'];
+  for (let i=0;i<20;i++) {
+    const s = document.createElement('span');
+    s.textContent = TOKENS[Math.floor(Math.random()*TOKENS.length)];
+    s.style.left = Math.random()*100 + '%';
+    s.style.fontSize = (28 + Math.random()*50) + 'px';
+    s.style.animationDuration = (5 + Math.random()*5) + 's';
+    s.style.animationDelay = (Math.random()*5) + 's';
+    container.appendChild(s);
+  }
+}
+makeDroplets('tokens1');
+makeDroplets('tokens2');
+makeDroplets('tokens3');
+
+// 觸發特定 Slide 的 SVG/CSS 動畫
+function triggerAnims(slideEl) {
+  const anims = slideEl.querySelectorAll('.anim');
+  anims.forEach(el => el.classList.remove('in'));
+  
+  // 特別處理水柱/水流類的特殊 SVG
+  const waterCols = slideEl.querySelectorAll('.water-column');
+  waterCols.forEach(el => el.classList.remove('in'));
+
+  const commWater = slideEl.querySelectorAll('.communicating-water');
+  commWater.forEach(el => el.classList.remove('in'));
+
+  anims.forEach(el => {
+    const d = parseInt(el.dataset.d || '0', 10);
+    setTimeout(() => {
+      el.classList.add('in');
+      // 同步添加子動畫元件
+      if(el.classList.contains('water-column')) el.classList.add('in');
+      if(el.classList.contains('communicating-water')) el.classList.add('in');
+    }, d);
+  });
+}
+
+let currentSlide = 0;
+let totalElapsed = 0;
+let slideStartTime = 0;
+let rafId = null;
+let isRenderMode = false;
+
+// 檢測是否為錄影渲染模式 (?render=true)
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('render') === 'true') {
+  isRenderMode = true;
+  startScreen.classList.add('hidden'); // 徹底隱藏點擊遮罩
+}
+
+function showSlide(i) {
+  slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+  sub.textContent = PAGES[i].sub;
+  sub.classList.add('show');
+  
+  // 錄製模式下不要發出聲音，避免自動播放限制與非同步；用 Playwright 純畫面即可
+  if (!isRenderMode) {
+    audio.src = `assets/narration/page-${String(PAGES[i].i).padStart(2,'0')}.mp3`;
+    audio.play().catch(()=>{});
+  }
+  
+  triggerAnims(slides[i]);
+  slideStartTime = performance.now();
+}
+
+function tick() {
+  const now = performance.now();
+  const elapsed = (now - slideStartTime) / 1000;
+  const slideDur = PAGES[currentSlide].dur;
+  const totalProg = (totalElapsed + elapsed) / TOTAL;
+  progress.style.width = (Math.min(totalProg, 1) * 100) + '%';
+  
+  if (elapsed >= slideDur) {
+    totalElapsed += slideDur;
+    currentSlide++;
+    if (currentSlide >= PAGES.length) {
+      cancelAnimationFrame(rafId);
+      return;
+    }
+    showSlide(currentSlide);
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+// 正常模式點擊開始
+startScreen.addEventListener('click', () => {
+  startScreen.classList.add('hidden');
+  setTimeout(() => {
+    showSlide(0);
+    rafId = requestAnimationFrame(tick);
+  }, 200);
+});
+
+// 錄影模式自動開場 (無需使用者互動)
+if (isRenderMode) {
+  setTimeout(() => {
+    showSlide(0);
+    rafId = requestAnimationFrame(tick);
+  }, 500);
+}
+</script>
+</body>
+</html>
