@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通往甲子園之路 - 棒球少年奮鬥史</title>
+  <style>
+    /* 1. 字型宣告 */
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');
+      font-weight: 900;
+      font-style: normal;
+    }
+
+    /* 2. 全域變數 */
+    :root {
+      --bg-black: #0A0A0A;
+      --text-ivory: #F5EFE2;
+      --accent-gold: #E8B14A;
+      --gray-cool: #7A8B99;
+      --red-clay: #D35400;
+      
+      --fs-hero: clamp(40px, 5.5vw, 84px);
+      --fs-sub: 28px;
+    }
+
+    /* 3. 基礎重設 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #000;
+      color: var(--text-ivory);
+      font-family: 'GenSekiGothic2TW', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 4. 1920x1080 視區鎖定 */
+    #app-viewport {
+      width: 1920px;
+      height: 1080px;
+      background-color: var(--bg-black);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center center;
+      flex-shrink: 0;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+    }
+
+    /* 5. 幻燈片結構 */
+    .slides-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      background-color: var(--bg-black);
+      transition: opacity 0.25s ease-in-out; /* 0.25s 漸淡 */
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+    }
+
+    .slide.fading-out {
+      opacity: 0;
+    }
+
+    /* 6. Ken Burns 效果與色彩情緒曲線 */
+    .slide-img-wrapper {
+      width: 100%;
+      height: 100%;
+      transform: scale(1.04); /* 稍大一點防止位移露邊 */
+      overflow: hidden;
+    }
+
+    .slide-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.0);
+      transform-origin: center center;
+      transition: transform 5s linear, filter 0.5s ease;
+    }
+
+    /* 套用色調情緒曲線 */
+    /* Hook 段 (1-3): 偏冷中性色調 */
+    .slide.hook .slide-img {
+      filter: contrast(1.05) saturate(0.85) hue-rotate(-5deg);
+    }
+    /* Turn/挫折段 (4-5): 寒冷低飽和灰色調 */
+    .slide.turn .slide-img {
+      filter: contrast(1.15) saturate(0.35) brightness(0.85) sepia(0.08) hue-rotate(10deg);
+    }
+    /* Peak/熱血高光段 (6-8): 暖金飽和度提升色調 */
+    .slide.peak .slide-img {
+      filter: contrast(1.1) saturate(1.2) brightness(1.02) sepia(0.12);
+    }
+    /* Echo/收尾段 (9): 電影感中性對比度 */
+    .slide.echo .slide-img {
+      filter: contrast(1.05) saturate(0.95) brightness(1.0);
+    }
+
+    /* 各頁客製化 Ken Burns 位移方向 */
+    /* s1: 右上推 */
+    .slide.s1.active.animate .slide-img {
+      transform: scale(1.06) translate(15px, -15px);
+    }
+    /* s2: 上推 */
+    .slide.s2.active.animate .slide-img {
+      transform: scale(1.06) translate(0, -20px);
+    }
+    /* s3: 右推 */
+    .slide.s3.active.animate .slide-img {
+      transform: scale(1.06) translate(20px, 0);
+    }
+    /* s4: 下沉 */
+    .slide.s4.active.animate .slide-img {
+      transform: scale(1.06) translate(0, 20px);
+    }
+    /* s5: 左推 */
+    .slide.s5.active.animate .slide-img {
+      transform: scale(1.06) translate(-20px, 0);
+    }
+    /* s6: 放大 */
+    .slide.s6.active.animate .slide-img {
+      transform: scale(1.08);
+    }
+    /* s7: 右推 */
+    .slide.s7.active.animate .slide-img {
+      transform: scale(1.07) translate(20px, 0);
+    }
+    /* s8: 向光源推 */
+    .slide.s8.active.animate .slide-img {
+      transform: scale(1.08) translate(10px, -10px);
+    }
+    /* s9: 上推 */
+    .slide.s9.active.animate .slide-img {
+      transform: scale(1.06) translate(0, -15px);
+    }
+
+    /* 7. SOIL 大字卡樣式 */
+    .soil-caption {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%) translateY(20px);
+      width: 80%;
+      text-align: center;
+      font-size: var(--fs-hero);
+      font-weight: 900;
+      color: var(--text-ivory);
+      opacity: 0;
+      z-index: 5;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75);
+      transition: opacity 1.5s ease-out, transform 1.5s ease-out;
+      letter-spacing: 2px;
+    }
+
+    .slide.active .soil-caption {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+
+    /* 4秒時大字卡提早淡出 */
+    .slide.active.fade-out-caption .soil-caption {
+      opacity: 0;
+      transition: opacity 1.0s ease-in;
+    }
+
+    /* 8. 頂部進度條 */
+    .progress-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.15);
+      z-index: 100;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--accent-gold);
+      transition: width 0.1s linear;
+    }
+
+    /* 9. 角落標記資訊 */
+    .chip-indicator {
+      position: absolute;
+      top: 40px;
+      left: 60px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-family: 'JetBrains Mono', 'GenSekiGothic2TW', monospace;
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .chip-num {
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    .chip-txt {
+      color: var(--text-ivory);
+      opacity: 0.8;
+      font-weight: 500;
+    }
+
+    /* 10. 底部口白字幕 */
+    .subtitle-bar {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 80%;
+      min-width: 400px;
+      background-color: rgba(10, 10, 10, 0.75);
+      border-radius: 8px;
+      padding: 14px 30px;
+      color: #FFFFFF;
+      font-size: var(--fs-sub);
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.5;
+      letter-spacing: 1px;
+      z-index: 10;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-viewport">
+    
+    <!-- 頂部進度條 -->
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- 角落章節晶片 -->
+    <div class="chip-indicator">
+      <span class="chip-num" id="chip-index">01 / 09</span>
+      <span style="color: rgba(255,255,255,0.3);">|</span>
+      <span class="chip-txt" id="chip-title">THE START</span>
+    </div>
+
+    <!-- 幻燈片容器 -->
+    <div class="slides-container">
+
+      <!-- s1 -->
+      <div class="slide hook s1" id="s1">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/01.png" class="slide-img" alt="起點">
+        </div>
+        <div class="soil-caption">那一天的起點</div>
+      </div>
+
+      <!-- s2 -->
+      <div class="slide hook s2" id="s2">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/02.png" class="slide-img" alt="日常努力">
+        </div>
+        <div class="soil-caption">汗水是日常</div>
+      </div>
+
+      <!-- s3 -->
+      <div class="slide hook s3" id="s3">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/03.png" class="slide-img" alt="初登場">
+        </div>
+        <div class="soil-caption">踏上打擊區</div>
+      </div>
+
+      <!-- s4 -->
+      <div class="slide turn s4" id="s4">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/04.png" class="slide-img" alt="跌倒">
+        </div>
+        <div class="soil-caption">泥濘中的跌倒</div>
+      </div>
+
+      <!-- s5 -->
+      <div class="slide turn s5" id="s5">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/05.png" class="slide-img" alt="暗夜摸索">
+        </div>
+        <div class="soil-caption">拍拍身上的泥土</div>
+      </div>
+
+      <!-- s6 -->
+      <div class="slide peak s6" id="s6">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/06.png" class="slide-img" alt="成長">
+        </div>
+        <div class="soil-caption">每一次揮棒</div>
+      </div>
+
+      <!-- s7 -->
+      <div class="slide peak s7" id="s7">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/07.png" class="slide-img" alt="大賽再戰">
+        </div>
+        <div class="soil-caption">再次站上舞台</div>
+      </div>
+
+      <!-- s8 -->
+      <div class="slide peak s8" id="s8">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/08.png" class="slide-img" alt="首勝高光">
+        </div>
+        <div class="soil-caption">贏了！首勝！</div>
+      </div>
+
+      <!-- s9 -->
+      <div class="slide echo s9" id="s9">
+        <div class="slide-img-wrapper">
+          <img src="assets/images/09.jpg" class="slide-img" alt="甲子園夢想">
+        </div>
+        <div class="soil-caption">目標：甲子園</div>
+      </div>
+
+    </div>
+
+    <!-- 底部口白字幕欄 -->
+    <div class="subtitle-bar" id="subtitle-box">字幕加載中...</div>
+
+  </div>
+
+  <script>
+    // 每個 Slide 均為 5000 毫秒（5s），總計 45000 毫秒
+    const PAGES = [
+      { id: 's1', chip: 'THE START', subtitle: "懷著對棒球的憧憬，你第一次踏上了這片紅土球場。" },
+      { id: 's2', chip: 'EFFORT', subtitle: "無數次的揮棒與奔跑，汗水濕透了衣背，這是新人的起步。" },
+      { id: 's3', chip: 'DEBUT', subtitle: "終於迎來了第一次上場的機會，心跳如鼓，雙手緊握球棒。" },
+      { id: 's4', chip: 'THE FALL', subtitle: "然而，命運開了個玩笑。一次意外的跌倒，讓你與勝利擦身而過。" },
+      { id: 's5', chip: 'RESOLVE', subtitle: "拍拍身上的泥土。你沒有哭泣，只是在無人的球場上練得更勤。" },
+      { id: 's6', chip: 'GROWTH', subtitle: "失敗化作了養分。漸漸地，你的球技更加犀利，眼神也變得更加堅定。" },
+      { id: 's7', chip: 'THE STAGE', subtitle: "第二次大型正式比賽，當哨音響起，這一次，你不再猶豫。" },
+      { id: 's8', chip: 'VICTORY', subtitle: "隨著一記清脆的擊球聲，首勝到手！全場的歡呼屬於堅持到底的你。" },
+      { id: 's9', chip: 'KOSHIEN', subtitle: "這只是個開始。抬起頭，甲子園的金色大門，正緩緩為你們開啟。" }
+    ];
+
+    const SLIDE_DURATION = 5000; // 每頁固定 5.0 秒
+    const FADE_OUT_CAPTION_TIME = 4000; // 4s 時大字卡淡出
+    const totalDuration = PAGES.length * SLIDE_DURATION;
+
+    let currentIdx = 0;
+    let startTime = 0;
+    let timer = null;
+
+    // 自適應視窗大小
+    function resize() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.min(vw / 1920, vh / 1080);
+      document.getElementById('app-viewport').style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('load', resize);
+
+    // 頂部進度條動畫
+    function updateProgress() {
+      if (startTime === 0) return;
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, (elapsed / totalDuration) * 100);
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+      if (pct < 100) {
+        requestAnimationFrame(updateProgress);
+      }
+    }
+
+    // 顯示指定幻燈片
+    function showNewSlide(index) {
+      const page = PAGES[index];
+      const el = document.getElementById(page.id);
+      
+      el.classList.add('active');
+      document.getElementById('subtitle-box').textContent = page.subtitle;
+      document.getElementById('chip-index').textContent = `${String(index + 1).padStart(2, '0')} / 09`;
+      document.getElementById('chip-title').textContent = page.chip;
+      
+      // 觸發 Ken Burns
+      setTimeout(() => {
+        el.classList.add('animate');
+      }, 50);
+      
+      // 4s 時大字卡淡出
+      setTimeout(() => {
+        el.classList.add('fade-out-caption');
+      }, FADE_OUT_CAPTION_TIME);
+    }
+
+    // 換頁轉換（含 250ms 淡出至黑屏，再淡入新頁，完美達到 0.5s 黑場轉場）
+    function transitionToSlide(index) {
+      const prevSlide = document.querySelector('.slide.active');
+      
+      if (prevSlide) {
+        prevSlide.classList.remove('animate', 'fade-out-caption');
+        prevSlide.classList.add('fading-out');
+        
+        setTimeout(() => {
+          prevSlide.classList.remove('active', 'fading-out');
+          showNewSlide(index);
+        }, 250);
+      } else {
+        showNewSlide(index);
+      }
+    }
+
+    // 自動循環播放
+    function runNext() {
+      if (currentIdx < PAGES.length - 1) {
+        currentIdx++;
+        transitionToSlide(currentIdx);
+        timer = setTimeout(runNext, SLIDE_DURATION);
+      } else {
+        console.log("PLAYBACK_COMPLETE");
+      }
+    }
+
+    // 啟動幻燈片播放
+    function startSlideshow() {
+      startTime = Date.now();
+      currentIdx = 0;
+      transitionToSlide(0);
+      updateProgress();
+      timer = setTimeout(runNext, SLIDE_DURATION);
+    }
+
+    // 暴露供 Playwright 錄影調用
+    window.startPresentation = startSlideshow;
+
+  </script>
+</body>
+</html>
