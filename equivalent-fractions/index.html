@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>等值分數的魔法 - 四年級數學教學影片</title>
+  <style>
+    /* 1. 字型宣告 */
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-M.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-B.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'GenSekiGothic2TW';
+      src: url('assets/fonts/GenSekiGothic2TW-H.otf') format('opentype');
+      font-weight: 900;
+      font-style: normal;
+    }
+
+    /* 2. 全域 CSS 變數 */
+    :root {
+      --paper: #FAF7EE;
+      --paper-2: #F2EDDC;
+      --ink: #1A1A1A;
+      --teal: #0E7C7B;
+      --coral: #E36414;
+      --gold: #C8941F;
+      
+      /* 字型大小規範 */
+      --fs-hero: 130px;
+      --fs-title: 80px;
+      --fs-sub: 56px;
+      --fs-body: 40px;
+      --fs-note: 30px;
+    }
+
+    /* 3. 基礎重設 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #000; /* 外部黑邊 */
+      color: var(--ink);
+      font-family: 'GenSekiGothic2TW', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 4. 1920x1080 視區鎖定與自動縮放 */
+    #app-viewport {
+      width: 1920px;
+      height: 1080px;
+      background-color: var(--paper);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center center;
+      flex-shrink: 0;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    }
+
+    /* 5. 簡報頁面容器 */
+    .slides-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease-in-out;
+      background-color: var(--paper);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      padding: 60px 80px 140px 80px; /* 保留底部放字幕的空間 */
+    }
+
+    .page.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* 頁面標題與章節標記 */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .chip {
+      background-color: var(--paper-2);
+      color: var(--teal);
+      font-weight: 700;
+      font-size: 24px;
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 2px solid rgba(14, 124, 123, 0.15);
+    }
+
+    .page-title {
+      font-size: var(--fs-title);
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    
+    .page-title span.hl {
+      color: var(--teal);
+    }
+    .page-title span.hl-coral {
+      color: var(--coral);
+    }
+
+    /* 6. 版面類型 */
+
+    /* L5: 純深色背景 */
+    .page.l5 {
+      background: radial-gradient(circle at center, #2c2c2c 0%, #111111 100%);
+      color: var(--paper);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 80px;
+    }
+
+    .page.l5 .hero-title {
+      font-size: var(--fs-hero);
+      font-weight: 900;
+      color: var(--paper);
+      margin-bottom: 40px;
+      letter-spacing: 4px;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .page.l5 .hero-title span.magic {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .page.l5 .hero-sub {
+      font-size: var(--fs-sub);
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 2px;
+    }
+
+    /* L2: 左右並列（情境引入） */
+    .page.l2 {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .page.l2 .left-col {
+      width: 48%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page.l2 .left-col img {
+      width: 100%;
+      max-height: 650px;
+      object-fit: cover;
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      border: 6px solid var(--paper-2);
+    }
+
+    .page.l2 .right-col {
+      width: 46%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .page.l2 .q-bubble {
+      background-color: var(--paper-2);
+      border-radius: 24px;
+      padding: 40px;
+      font-size: var(--fs-body);
+      font-weight: 500;
+      line-height: 1.6;
+      border-left: 10px solid var(--teal);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+
+    /* L4: SVG 置中圖解 */
+    .page.l4 .content-area {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .page.l4 .svg-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 100px;
+      margin-bottom: 40px;
+      height: 420px;
+    }
+
+    /* L6: 對比與應用 */
+    .page.l6 .content-area {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 40px;
+    }
+
+    .page.l6 .compare-box {
+      width: 45%;
+      background-color: var(--paper-2);
+      border-radius: 32px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+      border: 3px solid transparent;
+      transition: all 0.5s ease;
+    }
+
+    .page.l6 .compare-box.highlight {
+      border-color: var(--teal);
+      background-color: #fff;
+    }
+
+    .page.l6 .compare-box.danger {
+      border-color: var(--coral);
+      background-color: #FFF5F0;
+    }
+
+    .page.l6 .compare-vs {
+      font-size: 80px;
+      font-weight: 900;
+      color: var(--coral);
+    }
+
+    /* L3: 圖示與總結卡片 */
+    .page.l3 .cards-row {
+      flex-grow: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      gap: 40px;
+    }
+
+    .page.l3 .summary-card {
+      flex: 1;
+      height: 520px;
+      background-color: var(--paper-2);
+      border-radius: 32px;
+      padding: 50px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.03);
+      border: 3px solid transparent;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page.active.stage-1 .summary-card:nth-child(1) { opacity: 1; transform: translateY(0); }
+    .page.active.stage-2 .summary-card:nth-child(2) { opacity: 1; transform: translateY(0); }
+    .page.active.stage-3 .summary-card:nth-child(3) { opacity: 1; transform: translateY(0); }
+
+    .summary-card .icon-wrapper {
+      width: 120px;
+      height: 120px;
+      border-radius: 30px;
+      background-color: rgba(14, 124, 123, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      font-size: 60px;
+      color: var(--teal);
+    }
+    
+    .summary-card.danger .icon-wrapper {
+      background-color: rgba(227, 100, 20, 0.1);
+      color: var(--coral);
+    }
+
+    .summary-card h3 {
+      font-size: var(--fs-sub);
+      font-weight: 900;
+      margin-bottom: 20px;
+    }
+
+    .summary-card p {
+      font-size: 32px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    /* 7. 數學公式與標示 */
+    .math-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 54px;
+      font-weight: 700;
+      font-family: 'GenSekiGothic2TW', sans-serif;
+    }
+
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      padding: 0 10px;
+    }
+
+    .numerator {
+      border-bottom: 5px solid var(--ink);
+      padding: 0 10px 5px 10px;
+      line-height: 1.0;
+    }
+
+    .denominator {
+      padding: 5px 10px 0 10px;
+      line-height: 1.0;
+    }
+
+    /* 深色背景的算式線 */
+    .page.l5 .numerator {
+      border-bottom-color: var(--paper);
+    }
+
+    .math-hl {
+      color: var(--teal);
+      font-weight: 900;
+    }
+
+    .math-coral {
+      color: var(--coral);
+      font-weight: 900;
+    }
+
+    .math-cross {
+      position: relative;
+    }
+    
+    .math-cross::after {
+      content: '';
+      position: absolute;
+      left: -10px;
+      right: -10px;
+      top: 50%;
+      height: 8px;
+      background-color: var(--coral);
+      transform: rotate(-15deg);
+      border-radius: 4px;
+    }
+
+    /* 8. 底部字幕欄 */
+    .subtitle-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 110px;
+      background-color: rgba(26, 26, 26, 0.95);
+      color: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      padding: 0 80px;
+      font-size: var(--fs-note);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.5;
+      letter-spacing: 1px;
+      z-index: 100;
+    }
+
+    /* 9. 頂部進度條 */
+    .progress-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background-color: rgba(26, 26, 26, 0.1);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--teal);
+      transition: width 0.1s linear;
+    }
+
+    /* 10. 精美動畫元素細節 */
+
+    /* Page 3 比薩重疊 */
+    #p03-left-circle, #p03-right-circle {
+      transition: transform 1.8s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .page.active.stage-1 #p03-right-circle {
+      transform: translate(-450px, 0);
+    }
+    
+    .glow-circle {
+      stroke: var(--teal);
+      stroke-width: 0;
+      transition: stroke-width 0.5s ease;
+    }
+    .page.active.stage-2 .glow-circle {
+      stroke-width: 8px;
+      filter: drop-shadow(0 0 12px rgba(14, 124, 123, 0.6));
+    }
+
+    /* Page 5 擴分切分 */
+    .slice-line {
+      stroke: var(--ink);
+      stroke-width: 4px;
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      transition: stroke-dashoffset 1.5s ease-in-out;
+    }
+    .page.active.stage-1 .slice-line {
+      stroke-dashoffset: 0;
+    }
+    
+    .formula-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+    }
+    .page.active.stage-2 .formula-reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Page 6 約分合併 */
+    .fade-slice-line {
+      stroke: var(--ink);
+      stroke-width: 4px;
+      opacity: 1;
+      transition: opacity 1.5s ease-in-out;
+    }
+    .page.active.stage-1 .fade-slice-line {
+      opacity: 0;
+    }
+
+    /* Page 7 加法地雷紅叉 */
+    .cross-mark {
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .page.active.stage-1 .cross-mark {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .warning-card {
+      background-color: var(--coral);
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      padding: 15px 30px;
+      border-radius: 16px;
+      margin-top: 30px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+    }
+    .page.active.stage-2 .warning-card {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Page 9 比較大小 */
+    .bar-segment {
+      fill: #DDD;
+      stroke: var(--ink);
+      stroke-width: 2px;
+    }
+    
+    .bar-fill {
+      fill: var(--teal);
+      transition: width 1s ease;
+    }
+    
+    .bar-line-split {
+      stroke: var(--ink);
+      stroke-width: 2px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    
+    .page.active.stage-1 .bar-line-split {
+      opacity: 1;
+    }
+    
+    .compare-result {
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .page.active.stage-2 .compare-result {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Page 10 加法通分 */
+    .p10-split-line {
+      stroke: var(--ink);
+      stroke-width: 2px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    
+    .page.active.stage-1 .p10-split-line {
+      opacity: 1;
+    }
+    
+    .p10-circle {
+      opacity: 1;
+      transition: opacity 0.8s ease, transform 1s ease;
+    }
+    
+    .page.active.stage-2 .p10-circle.src {
+      opacity: 0.3;
+    }
+    
+    .p10-sum-area {
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+    
+    .page.active.stage-2 .p10-sum-area {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="app-viewport">
+    
+    <!-- 頂部進度條 -->
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- 簡報頁面容器 -->
+    <div class="slides-container">
+
+      <!-- ================= PAGE 01 ================= -->
+      <div class="page l5" id="p01">
+        <div class="hero-title">等值分數的<span class="magic">魔法</span></div>
+        <div class="hero-sub">四年級數學 · 教學影片</div>
+      </div>
+
+      <!-- ================= PAGE 02 ================= -->
+      <div class="page l2" id="p02">
+        <div class="left-col">
+          <!-- 披薩照片 -->
+          <img src="assets/images/pizza.jpg" alt="美味披薩">
+        </div>
+        <div class="right-col">
+          <div class="header-bar" style="margin-bottom: 40px;">
+            <div class="chip">02 / 12 — 引起動機</div>
+          </div>
+          <div class="page-title" style="margin-bottom: 40px;">誰拿的披薩比較多？</div>
+          <div class="q-bubble">
+            小豬分到了 <strong class="math-hl">二分之一個</strong> 披薩，<br>
+            小熊分到了 <strong class="math-hl">四分之二個</strong> 披薩。<br>
+            小熊氣呼呼地說：「小豬的分量比較多，不公平！」<br>
+            <span style="color: var(--coral); font-weight: 700; margin-top: 20px; display: block;">真的是這樣嗎？</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 03 ================= -->
+      <div class="page l4" id="p03">
+        <div class="header-bar">
+          <div class="page-title">疊在一起看一看</div>
+          <div class="chip">03 / 12 — 引起動機</div>
+        </div>
+        
+        <div class="content-area">
+          <div class="svg-display" style="position: relative; width: 1200px;">
+            <!-- 左圓 (小豬 1/2) -->
+            <svg width="400" height="400" id="p03-left-circle" style="position: absolute; left: 150px;">
+              <!-- 背景圓 -->
+              <circle cx="200" cy="200" r="180" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="4"/>
+              <!-- 1/2 塗色區塊 (右半圓) -->
+              <path d="M 200,20 A 180,180 0 0,1 200,380 Z" fill="var(--teal)" />
+              <!-- 分線 -->
+              <line x1="200" y1="20" x2="200" y2="380" stroke="var(--ink)" stroke-width="4" />
+              <!-- 標籤 -->
+              <text x="200" y="215" font-size="48" font-family="GenSekiGothic2TW" font-weight="900" fill="var(--paper)" text-anchor="middle">1/2</text>
+            </svg>
+
+            <!-- 右圓 (小熊 2/4) -->
+            <svg width="400" height="400" id="p03-right-circle" style="position: absolute; left: 650px;">
+              <!-- 背景圓 -->
+              <circle cx="200" cy="200" r="180" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="4" class="glow-circle" />
+              <!-- 2/4 塗色區塊 (右半圓) -->
+              <path d="M 200,20 A 180,180 0 0,1 200,380 Z" fill="var(--teal)" />
+              <!-- 4等份分線 -->
+              <line x1="200" y1="20" x2="200" y2="380" stroke="var(--ink)" stroke-width="4" />
+              <line x1="20" y1="200" x2="380" y2="200" stroke="var(--ink)" stroke-width="4" />
+              <!-- 標籤 -->
+              <text x="200" y="215" font-size="48" font-family="GenSekiGothic2TW" font-weight="900" fill="var(--paper)" text-anchor="middle">2/4</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 04 ================= -->
+      <div class="page l5" id="p04">
+        <div class="hero-title" style="font-size: 150px; margin-bottom: 20px;"><span class="magic">等值分數</span></div>
+        <div class="hero-sub" style="font-size: var(--fs-body); color: var(--paper); line-height: 1.8; max-width: 1200px;">
+          分數的分子和分母數字長得不一樣，<br>
+          但是代表的<strong>實際大小完全相同</strong>，就叫做等值分數。
+        </div>
+      </div>
+
+      <!-- ================= PAGE 05 ================= -->
+      <div class="page l4" id="p05">
+        <div class="header-bar">
+          <div class="page-title">乘法魔法：<span class="hl">擴分</span></div>
+          <div class="chip">05 / 12 — 發展活動</div>
+        </div>
+        
+        <div class="content-area">
+          <div class="svg-display">
+            <!-- 圓形 1/2 切分為 2/4 -->
+            <svg width="400" height="400">
+              <circle cx="200" cy="200" r="180" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="4"/>
+              <!-- 塗色區塊 (右半圓) -->
+              <path d="M 200,20 A 180,180 0 0,1 200,380 Z" fill="var(--teal)" />
+              <!-- 原本的 1/2 垂直分線 -->
+              <line x1="200" y1="20" x2="200" y2="380" stroke="var(--ink)" stroke-width="4" />
+              <!-- 擴分切下一刀的水平線 -->
+              <line x1="20" y1="200" x2="380" y2="200" stroke="var(--coral)" class="slice-line" />
+            </svg>
+
+            <!-- 算式推導 -->
+            <div class="math-block formula-reveal" style="font-size: 60px;">
+              <div class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator">2</span>
+              </div>
+              <div>＝</div>
+              <div class="fraction">
+                <span class="numerator">1 <span class="math-coral">× 2</span></span>
+                <span class="denominator">2 <span class="math-coral">× 2</span></span>
+              </div>
+              <div>＝</div>
+              <div class="fraction">
+                <span class="numerator">2</span>
+                <span class="denominator">4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 06 ================= -->
+      <div class="page l4" id="p06">
+        <div class="header-bar">
+          <div class="page-title">除法魔法：<span class="hl">約分</span></div>
+          <div class="chip">06 / 12 — 發展活動</div>
+        </div>
+        
+        <div class="content-area">
+          <div class="svg-display">
+            <!-- 圓形 4/8 合併為 1/2 -->
+            <svg width="400" height="400">
+              <circle cx="200" cy="200" r="180" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="4"/>
+              <!-- 右半圓 4 片塗色 -->
+              <path d="M 200,20 A 180,180 0 0,1 200,380 Z" fill="var(--teal)" />
+              <!-- 垂直分線 -->
+              <line x1="200" y1="20" x2="200" y2="380" stroke="var(--ink)" stroke-width="4" />
+              <!-- 細分線：水平與斜角 -->
+              <line x1="20" y1="200" x2="380" y2="200" class="fade-slice-line" />
+              <line x1="72.7" y1="72.7" x2="327.3" y2="327.3" class="fade-slice-line" />
+              <line x1="72.7" y1="327.3" x2="327.3" y2="72.7" class="fade-slice-line" />
+            </svg>
+
+            <!-- 算式推導 -->
+            <div class="math-block formula-reveal" style="font-size: 60px;">
+              <div class="fraction">
+                <span class="numerator">4</span>
+                <span class="denominator">8</span>
+              </div>
+              <div>＝</div>
+              <div class="fraction">
+                <span class="numerator">4 <span class="math-coral">÷ 4</span></span>
+                <span class="denominator">8 <span class="math-coral">÷ 4</span></span>
+              </div>
+              <div>＝</div>
+              <div class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator">2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 07 ================= -->
+      <div class="page l6" id="p07">
+        <div class="header-bar">
+          <div class="page-title">注意地雷！<span class="hl-coral">不能用加減法</span></div>
+          <div class="chip">07 / 12 — 發展活動</div>
+        </div>
+        
+        <div class="content-area">
+          <!-- 正確的等值基準 -->
+          <div class="compare-box">
+            <svg width="220" height="220" style="margin-bottom: 20px;">
+              <circle cx="110" cy="110" r="95" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="3"/>
+              <path d="M 110,15 A 95,95 0 0,1 110,205 Z" fill="var(--teal)" />
+              <line x1="110" y1="15" x2="110" y2="205" stroke="var(--ink)" stroke-width="3" />
+            </svg>
+            <div class="math-block">
+              <div class="fraction">
+                <span class="numerator">1</span>
+                <span class="denominator">2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- VS 符號 -->
+          <div class="compare-vs">≠</div>
+
+          <!-- 錯誤地雷 -->
+          <div class="compare-box danger" style="position: relative;">
+            <svg width="220" height="220" style="margin-bottom: 20px;">
+              <circle cx="110" cy="110" r="95" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="3"/>
+              <!-- 2/3 塗色區塊 (角度 240度) -->
+              <path d="M 110,15 A 95,95 0 1,1 27.7,157.5 L 110,110 Z" fill="var(--coral)" />
+              <!-- 3等份分線 -->
+              <line x1="110" y1="15" x2="110" y2="110" stroke="var(--ink)" stroke-width="3" />
+              <line x1="110" y1="110" x2="192.3" y2="157.5" stroke="var(--ink)" stroke-width="3" />
+              <line x1="110" y1="110" x2="27.7" y2="157.5" stroke="var(--ink)" stroke-width="3" />
+            </svg>
+            
+            <!-- 紅叉蓋在上面 -->
+            <svg width="220" height="220" class="cross-mark" style="position: absolute; top: 40px; pointer-events: none;">
+              <line x1="20" y1="20" x2="200" y2="200" stroke="var(--coral)" stroke-width="12" stroke-linecap="round" />
+              <line x1="20" y1="200" x2="200" y2="20" stroke="var(--coral)" stroke-width="12" stroke-linecap="round" />
+            </svg>
+
+            <div class="math-block">
+              <div class="fraction math-cross">
+                <span class="numerator">1 <span class="math-coral">+ 1</span></span>
+                <span class="denominator">2 <span class="math-coral">+ 1</span></span>
+              </div>
+              <div style="margin: 0 10px;">＝</div>
+              <div class="fraction">
+                <span class="numerator">2</span>
+                <span class="denominator">3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 20px;">
+          <div class="warning-card">地雷警告：分子與分母同時加上相同數，面積會變大喔！</div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 08 ================= -->
+      <div class="page l5" id="p08">
+        <div class="hero-title" style="font-size: 110px; margin-bottom: 40px;">等值分數能做什麼？</div>
+        <div class="hero-sub" style="font-size: 48px; color: var(--gold);">學會了魔法，讓我們來解決問題吧！</div>
+      </div>
+
+      <!-- ================= PAGE 09 ================= -->
+      <div class="page l6" id="p09">
+        <div class="header-bar">
+          <div class="page-title">應用一：<span class="hl">比較不同分母的大小</span></div>
+          <div class="chip">09 / 12 — 綜合活動</div>
+        </div>
+        
+        <div class="content-area" style="flex-direction: column; justify-content: space-around;">
+          <div style="font-size: 40px; font-weight: 700; text-align: center; width: 100%;">
+            比較 <span class="math-hl">2/3</span> 與 <span class="math-coral">3/4</span> 的大小
+          </div>
+          
+          <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+            <!-- 2/3 通分 -->
+            <div class="compare-box highlight">
+              <div class="math-block" style="font-size: 40px; margin-bottom: 20px;">
+                <div class="fraction">
+                  <span class="numerator">2</span>
+                  <span class="denominator">3</span>
+                </div>
+                <div>＝</div>
+                <div class="fraction">
+                  <span class="numerator">2 × 4</span>
+                  <span class="denominator">3 × 4</span>
+                </div>
+                <div>＝</div>
+                <div class="fraction">
+                  <span class="numerator">8</span>
+                  <span class="denominator">12</span>
+                </div>
+              </div>
+              
+              <!-- 12等分條圖 (2/3 -> 8/12) -->
+              <svg width="360" height="40">
+                <rect x="0" y="0" width="360" height="40" fill="#EAEAEA" stroke="var(--ink)" stroke-width="2" rx="5" />
+                <!-- 填滿 8 格 -->
+                <rect x="0" y="0" width="240" height="40" class="bar-fill" rx="5" />
+                <!-- 3等份粗分線 -->
+                <line x1="120" y1="0" x2="120" y2="40" stroke="var(--ink)" stroke-width="3" />
+                <line x1="240" y1="0" x2="240" y2="40" stroke="var(--ink)" stroke-width="3" />
+                <!-- 12等份細分線 -->
+                <line x1="30" y1="0" x2="30" y2="40" class="bar-line-split" />
+                <line x1="60" y1="0" x2="60" y2="40" class="bar-line-split" />
+                <line x1="90" y1="0" x2="90" y2="40" class="bar-line-split" />
+                <line x1="150" y1="0" x2="150" y2="40" class="bar-line-split" />
+                <line x1="180" y1="0" x2="180" y2="40" class="bar-line-split" />
+                <line x1="210" y1="0" x2="210" y2="40" class="bar-line-split" />
+                <line x1="270" y1="0" x2="270" y2="40" class="bar-line-split" />
+                <line x1="300" y1="0" x2="300" y2="40" class="bar-line-split" />
+                <line x1="330" y1="0" x2="330" y2="40" class="bar-line-split" />
+              </svg>
+            </div>
+
+            <!-- VS -->
+            <div style="font-size: 60px; font-weight: 900;">vs</div>
+
+            <!-- 3/4 通分 -->
+            <div class="compare-box danger">
+              <div class="math-block" style="font-size: 40px; margin-bottom: 20px;">
+                <div class="fraction">
+                  <span class="numerator">3</span>
+                  <span class="denominator">4</span>
+                </div>
+                <div>＝</div>
+                <div class="fraction">
+                  <span class="numerator">3 × 3</span>
+                  <span class="denominator">4 × 3</span>
+                </div>
+                <div>＝</div>
+                <div class="fraction">
+                  <span class="numerator">9</span>
+                  <span class="denominator">12</span>
+                </div>
+              </div>
+              
+              <!-- 12等分條圖 (3/4 -> 9/12) -->
+              <svg width="360" height="40">
+                <rect x="0" y="0" width="360" height="40" fill="#EAEAEA" stroke="var(--ink)" stroke-width="2" rx="5" />
+                <!-- 填滿 9 格 -->
+                <rect x="0" y="0" width="270" height="40" class="bar-fill" rx="5" fill="var(--coral)" />
+                <!-- 4等份粗分線 -->
+                <line x1="90" y1="0" x2="90" y2="40" stroke="var(--ink)" stroke-width="3" />
+                <line x1="180" y1="0" x2="180" y2="40" stroke="var(--ink)" stroke-width="3" />
+                <line x1="270" y1="0" x2="270" y2="40" stroke="var(--ink)" stroke-width="3" />
+                <!-- 12等份細分線 -->
+                <line x1="30" y1="0" x2="30" y2="40" class="bar-line-split" />
+                <line x1="60" y1="0" x2="60" y2="40" class="bar-line-split" />
+                <line x1="120" y1="0" x2="120" y2="40" class="bar-line-split" />
+                <line x1="150" y1="0" x2="150" y2="40" class="bar-line-split" />
+                <line x1="210" y1="0" x2="210" y2="40" class="bar-line-split" />
+                <line x1="240" y1="0" x2="240" y2="40" class="bar-line-split" />
+                <line x1="300" y1="0" x2="300" y2="40" class="bar-line-split" />
+                <line x1="330" y1="0" x2="330" y2="40" class="bar-line-split" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- 比較結果 -->
+          <div class="math-block compare-result" style="width: 100%; justify-content: center; font-size: 54px; font-weight: 900;">
+            因為 
+            <div class="fraction" style="margin: 0 10px;">
+              <span class="numerator">8</span>
+              <span class="denominator">12</span>
+            </div>
+            ＜
+            <div class="fraction" style="margin: 0 10px;">
+              <span class="numerator">9</span>
+              <span class="denominator">12</span>
+            </div>
+            ，所以
+            <div class="fraction" style="margin: 0 10px;">
+              <span class="numerator">2</span>
+              <span class="denominator">3</span>
+            </div>
+            ＜
+            <div class="fraction" style="margin: 0 10px; color: var(--coral);">
+              <span class="numerator">3</span>
+              <span class="denominator">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 10 ================= -->
+      <div class="page l4" id="p10">
+        <div class="header-bar">
+          <div class="page-title">應用二：<span class="hl">分母不同怎麼相加？</span></div>
+          <div class="chip">10 / 12 — 綜合活動</div>
+        </div>
+        
+        <div class="content-area">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 20px; width: 100%;">
+            <!-- 1/2 circle -->
+            <div class="p10-circle src" style="display: flex; flex-direction: column; align-items: center;">
+              <svg width="220" height="220" style="margin-bottom: 10px;">
+                <circle cx="110" cy="110" r="95" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="3"/>
+                <path d="M 110,15 A 95,95 0 0,1 110,205 Z" fill="var(--teal)" />
+                <line x1="110" y1="15" x2="110" y2="205" stroke="var(--ink)" stroke-width="3" />
+                <!-- 切6等份的細線 -->
+                <line x1="27.7" y1="157.5" x2="192.3" y2="62.5" class="p10-split-line" />
+                <line x1="27.7" y1="62.5" x2="192.3" y2="157.5" class="p10-split-line" />
+              </svg>
+              <div class="math-block" style="font-size: 32px;">
+                <div class="fraction">
+                  <span class="numerator">1</span>
+                  <span class="denominator">2</span>
+                </div>
+                <div class="p10-split-line" style="display: inline;">(＝ <div class="fraction"><span class="numerator">3</span><span class="denominator">6</span></div>)</div>
+              </div>
+            </div>
+
+            <div style="font-size: 50px; font-weight: 900;">＋</div>
+
+            <!-- 1/3 circle -->
+            <div class="p10-circle src" style="display: flex; flex-direction: column; align-items: center;">
+              <svg width="220" height="220" style="margin-bottom: 10px;">
+                <circle cx="110" cy="110" r="95" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="3"/>
+                <!-- 1/3 塗色 -->
+                <path d="M 110,15 A 95,95 0 0,1 192.3,157.5 L 110,110 Z" fill="var(--teal)" />
+                <!-- 3等份分線 -->
+                <line x1="110" y1="15" x2="110" y2="110" stroke="var(--ink)" stroke-width="3" />
+                <line x1="110" y1="110" x2="192.3" y2="157.5" stroke="var(--ink)" stroke-width="3" />
+                <line x1="110" y1="110" x2="27.7" y2="157.5" stroke="var(--ink)" stroke-width="3" />
+                <!-- 切6等份的細線 -->
+                <line x1="110" y1="110" x2="192.3" y2="62.5" class="p10-split-line" />
+                <line x1="110" y1="110" x2="27.7" y2="62.5" class="p10-split-line" />
+                <line x1="110" y1="110" x2="110" y2="205" class="p10-split-line" />
+              </svg>
+              <div class="math-block" style="font-size: 32px;">
+                <div class="fraction">
+                  <span class="numerator">1</span>
+                  <span class="denominator">3</span>
+                </div>
+                <div class="p10-split-line" style="display: inline;">(＝ <div class="fraction"><span class="numerator">2</span><span class="denominator">6</span></div>)</div>
+              </div>
+            </div>
+
+            <div class="p10-sum-area" style="font-size: 50px; font-weight: 900;">＝</div>
+
+            <!-- Sum circle 5/6 -->
+            <div class="p10-sum-area" style="display: flex; flex-direction: column; align-items: center;">
+              <svg width="220" height="220" style="margin-bottom: 10px;">
+                <circle cx="110" cy="110" r="95" fill="rgba(26,26,26,0.03)" stroke="var(--ink)" stroke-width="3"/>
+                <!-- 5/6 塗色 -->
+                <path d="M 110,15 A 95,95 0 1,1 27.7,157.5 L 110,110 Z" fill="var(--teal)" />
+                <!-- 6等份分線 -->
+                <line x1="110" y1="15" x2="110" y2="205" stroke="var(--ink)" stroke-width="3" />
+                <line x1="27.7" y1="157.5" x2="192.3" y2="62.5" stroke="var(--ink)" stroke-width="3" />
+                <line x1="27.7" y1="62.5" x2="192.3" y2="157.5" stroke="var(--ink)" stroke-width="3" />
+              </svg>
+              <div class="math-block" style="font-size: 32px;">
+                <div class="fraction">
+                  <span class="numerator">5</span>
+                  <span class="denominator">6</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 加法算式推導 -->
+          <div class="math-block formula-reveal" style="font-size: 42px; width: 100%; justify-content: center;">
+            <div class="fraction">
+              <span class="numerator">1</span>
+              <span class="denominator">2</span>
+            </div>
+            <div>＋</div>
+            <div class="fraction">
+              <span class="numerator">1</span>
+              <span class="denominator">3</span>
+            </div>
+            <div>＝</div>
+            <div class="fraction">
+              <span class="numerator">3</span>
+              <span class="denominator">6</span>
+            </div>
+            <div>＋</div>
+            <div class="fraction">
+              <span class="numerator">2</span>
+              <span class="denominator">6</span>
+            </div>
+            <div>＝</div>
+            <div class="fraction" style="color: var(--teal); font-weight: 900;">
+              <span class="numerator">5</span>
+              <span class="denominator">6</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 11 ================= -->
+      <div class="page l3" id="p11">
+        <div class="header-bar">
+          <div class="page-title">等值分數的知識地圖</div>
+          <div class="chip">11 / 12 — 綜合活動</div>
+        </div>
+        
+        <div class="cards-row">
+          <!-- 擴分 -->
+          <div class="summary-card">
+            <div class="icon-wrapper">✖️</div>
+            <h3>乘法擴分</h3>
+            <p>分子和分母同乘大於零的數，細分切片，大小不變。</p>
+          </div>
+
+          <!-- 約分 -->
+          <div class="summary-card">
+            <div class="icon-wrapper">➗</div>
+            <h3>除法約分</h3>
+            <p>分子和分母同除以公因數，合併大塊，化繁為簡。</p>
+          </div>
+
+          <!-- 應用 -->
+          <div class="summary-card danger">
+            <div class="icon-wrapper">⚖️</div>
+            <h3>通分應用</h3>
+            <p>同分母后，便能進行大小比較與異分母加減法！</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PAGE 12 ================= -->
+      <div class="page l5" id="p12">
+        <div class="hero-title" style="font-size: 110px; margin-bottom: 40px;">數字會變，大小不變</div>
+        <div class="hero-sub" style="font-size: 40px; color: var(--gold); max-width: 1200px; line-height: 1.6;">
+          「掌握等值分數，就是掌握分數的自由！」<br>
+          下次分披薩時，也來用等值分數變魔術吧！
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部字幕欄 -->
+    <div class="subtitle-bar" id="subtitle-bar">字幕加載中...</div>
+
+  </div>
+
+  <script>
+    // 頁面時程定義：與音檔時長匹配，並保留暫停 buffer
+    const PAGES = [
+      { id: 'p01', duration: 10000, subtitle: "大家好！今天我們要一起來學習一個非常神奇的數學概念，叫做「等值分數的魔法」！" },
+      { id: 'p02', duration: 15000, subtitle: "媽媽烤了一個好吃的比薩，小豬分到了二分之一個，小熊分到了四分之二個。小熊不服氣地抗議，覺得小豬拿得比較多。真的是這樣嗎？" },
+      { id: 'p03', duration: 14000, subtitle: "我們把這兩份比薩重疊在一起看一看。哇！雖然切的份數不一樣，但是塗上顏色的地方，大小居然完全相同！" },
+      { id: 'p04', duration: 15000, subtitle: "這就是等值分數的魔法！雖然分母和分子的數字長得不一樣，但是它們代表的大小卻是完全相等的！我們就叫它們「等值分數」。" },
+      { id: 'p05', duration: 19000, subtitle: "我們要怎麼製造等值分數呢？很簡單，只要把分子和分母同時乘以一個比零大的數。把二分之一的分子分母同時乘上二，就變成了四分之二，大小沒有變喔！這就叫「擴分」。" },
+      { id: 'p06', duration: 18000, subtitle: "反過來，如果我們把分子和分母同時除以大於一的公因數，把很多小片合併成一大片，這就叫做「約分」。例如把八分之四的分子和分母同時除以四，就會變回最簡單的二分之一。" },
+      { id: 'p07', duration: 20000, subtitle: "這裡有一個很容易踩到的地雷喔！分子和分母只能「同乘或同除」相同的數。如果同時「加上」相同的數，比如二分之一加上一變三分之二，你看圖形，大小就不一樣了！千萬要小心。" },
+      { id: 'p08', duration: 14000, subtitle: "學會了等值分數的魔法，在生活和數學中到底有什麼用呢？其實，它能幫我們解決兩大難題喔！讓我們一起來看看。" },
+      { id: 'p09', duration: 20000, subtitle: "第一個應用是「比較大小」。例如三分之二和四分之三，分母不同很難比。但是我們可以把它們擴分為分母都是十二的等值分數，變成十二分之八和十二分之九，這樣一比，就知道四分之三比較大囉！" },
+      { id: 'p10', duration: 20000, subtitle: "第二個應用是「加減法」。像是二分之一加三分之一，因為分母不同不能直接加。我們利用等值分數把它們都變成六分之三和六分之二，相加就得到六分之五。這在數學上就叫做「通分」！" },
+      { id: 'p11', duration: 16000, subtitle: "我們來總結一下今天學到的魔法吧！我們學會了同乘的「擴分」，同除的「約分」，還有把它們應用在異分母分數的「比較大小」和「加減法」上。你都記住了嗎？" },
+      { id: 'p12', duration: 18000, subtitle: "水藍色的分數世界非常有趣，數字雖然變了，但實際的大小卻不曾改變。下次吃披薩或分蛋糕時，別忘了和身邊的人分享這個神奇的分數魔法喔！我們下次見！" }
+    ];
+
+    let currentIdx = 0;
+    let startTime = 0;
+    let timer = null;
+
+    const totalDuration = PAGES.reduce((sum, p) => sum + p.duration, 0);
+
+    // 視區自我調整大小
+    function resize() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.min(vw / 1920, vh / 1080);
+      document.getElementById('app-viewport').style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', resize);
+    window.addEventListener('load', resize);
+
+    // 更新進度條
+    function updateProgress() {
+      if (startTime === 0) return;
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, (elapsed / totalDuration) * 100);
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+      if (pct < 100) {
+        requestAnimationFrame(updateProgress);
+      }
+    }
+
+    // 進入特定頁面
+    function activatePage(index) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(p => {
+        p.classList.remove('active', 'stage-1', 'stage-2', 'stage-3');
+      });
+
+      const page = PAGES[index];
+      const el = document.getElementById(page.id);
+      el.classList.add('active');
+      document.getElementById('subtitle-bar').textContent = page.subtitle;
+
+      // 針對每頁客製化播放內部的動畫序列
+      if (page.id === 'p03') {
+        // 重疊比薩：2s 重疊，5s 發光
+        setTimeout(() => el.classList.add('stage-1'), 2000);
+        setTimeout(() => el.classList.add('stage-2'), 4500);
+      } else if (page.id === 'p05') {
+        // 擴分：2s 劃切分線，5s 出算式
+        setTimeout(() => el.classList.add('stage-1'), 2000);
+        setTimeout(() => el.classList.add('stage-2'), 5000);
+      } else if (page.id === 'p06') {
+        // 約分：2s 合併線條，5s 出算式
+        setTimeout(() => el.classList.add('stage-1'), 2000);
+        setTimeout(() => el.classList.add('stage-2'), 5000);
+      } else if (page.id === 'p07') {
+        // 地雷：2s 蓋紅叉，5s 警告文字
+        setTimeout(() => el.classList.add('stage-1'), 2000);
+        setTimeout(() => el.classList.add('stage-2'), 5000);
+      } else if (page.id === 'p09') {
+        // 比較：2s 出等分條圖，6s 出比較結論
+        setTimeout(() => el.classList.add('stage-1'), 2500);
+        setTimeout(() => el.classList.add('stage-2'), 6500);
+      } else if (page.id === 'p10') {
+        // 加法：2.5s 原圓形細分，6.5s 加法圓形與等號出現，11.5s 算式出現
+        setTimeout(() => el.classList.add('stage-1'), 2500);
+        setTimeout(() => el.classList.add('stage-2'), 6500);
+        setTimeout(() => el.classList.add('stage-3'), 11500);
+      } else if (page.id === 'p11') {
+        // 總結地圖：2s, 6s, 10s 分別彈出三張卡片
+        setTimeout(() => el.classList.add('stage-1'), 2000);
+        setTimeout(() => el.classList.add('stage-2'), 5500);
+        setTimeout(() => el.classList.add('stage-3'), 9500);
+      }
+    }
+
+    // 自動換頁邏輯
+    function runNext() {
+      if (currentIdx < PAGES.length - 1) {
+        currentIdx++;
+        activatePage(currentIdx);
+        timer = setTimeout(runNext, PAGES[currentIdx].duration);
+      } else {
+        console.log("PLAYBACK_COMPLETE");
+      }
+    }
+
+    // 啟動幻燈片
+    function startSlideshow() {
+      startTime = Date.now();
+      currentIdx = 0;
+      activatePage(0);
+      updateProgress();
+      timer = setTimeout(runNext, PAGES[0].duration);
+    }
+
+    // 暴露供錄影腳本調用
+    window.startPresentation = startSlideshow;
+
+  </script>
+</body>
+</html>
